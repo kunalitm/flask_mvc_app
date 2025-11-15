@@ -1,0 +1,6 @@
+"""
+Plugin manager module
+"""
+from app.plugins.manager.plugin_manager import PluginManager
+
+__all__ = ['PluginManager']
