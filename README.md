@@ -1,11 +1,12 @@
 # Flask MVC Application with Plugin Architecture
 
-A comprehensive web application built with Flask following MVC (Model-View-Controller) architecture and featuring a dynamic plugin system for extensibility.
+A comprehensive full-stack web application built with Flask backend (MVC architecture) and React frontend, featuring a dynamic plugin system for extensibility.
 
 ## Features
 
 ### Core Features
 - **MVC Architecture**: Clean separation of concerns with Models, Views, and Controllers
+- **React Frontend**: Modern, responsive UI built with React, Vite, and Tailwind CSS
 - **Plugin System**: Dynamic plugin loading and management with lifecycle hooks
 - **User Management**: Complete user CRUD operations with authentication
 - **Role Management**: Flexible role-based access control (RBAC)
@@ -30,7 +31,7 @@ A comprehensive web application built with Flask following MVC (Model-View-Contr
 
 ```
 flask_mvc_app/
-├── app/
+├── app/                         # Backend application
 │   ├── __init__.py              # Application factory
 │   ├── config/
 │   │   ├── __init__.py
@@ -65,13 +66,29 @@ flask_mvc_app/
 │       ├── __init__.py
 │       ├── rbac.py              # RBAC decorators
 │       └── init_db.py           # Database initialization
+├── frontend/                    # React frontend application
+│   ├── src/
+│   │   ├── components/          # React components
+│   │   │   ├── Auth/            # Authentication components
+│   │   │   ├── Dashboard/       # Dashboard
+│   │   │   ├── Layout/          # Main layout
+│   │   │   ├── Users/           # User management
+│   │   │   ├── Roles/           # Role management
+│   │   │   ├── Plugins/         # Plugin management
+│   │   │   └── Stock/           # Inventory management
+│   │   ├── services/            # API service layer
+│   │   ├── App.jsx              # Main app component
+│   │   └── main.jsx             # Entry point
+│   ├── package.json             # Frontend dependencies
+│   ├── vite.config.js           # Vite configuration
+│   └── README.md                # Frontend documentation
 ├── docs/
 │   └── API_DOCUMENTATION.md     # Complete API reference
 ├── instance/                    # Instance-specific files (gitignored)
 │   ├── app.db                   # SQLite database
 │   └── plugin_configs/          # Plugin configurations
 ├── tests/                       # Test suite
-├── run.py                       # Application entry point
+├── run.py                       # Backend entry point
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # Environment variables example
 ├── .gitignore
@@ -82,10 +99,13 @@ flask_mvc_app/
 
 ### Prerequisites
 - Python 3.8 or higher
+- Node.js 16+ and npm
 - pip (Python package manager)
 - virtualenv (recommended)
 
 ### Setup Steps
+
+#### Backend Setup
 
 1. **Clone the repository**
 ```bash
@@ -99,7 +119,7 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. **Install dependencies**
+3. **Install Python dependencies**
 ```bash
 pip install -r requirements.txt
 ```
@@ -122,14 +142,50 @@ The application will:
 - Create a default admin user (username: admin, password: admin123)
 - Discover and load available plugins
 
+#### Frontend Setup
+
+1. **Navigate to frontend directory**
+```bash
+cd frontend
+```
+
+2. **Install Node dependencies**
+```bash
+npm install
+```
+
+3. **Start the development server**
+```bash
+npm run dev
+```
+
+The frontend will start on `http://localhost:3000`
+
+For detailed frontend documentation, see [frontend/README.md](frontend/README.md)
+
 ## Running the Application
 
 ### Development Mode
+
+**Terminal 1 - Backend:**
 ```bash
 python run.py
 ```
+The backend server will start on `http://localhost:5000`
 
-The server will start on `http://localhost:5000`
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+The frontend will start on `http://localhost:3000`
+
+**Access the application:**
+Open your browser and navigate to `http://localhost:3000`
+
+**Login with default credentials:**
+- Username: `admin`
+- Password: `admin123`
 
 ### Production Mode
 ```bash
