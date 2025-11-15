@@ -42,17 +42,17 @@ def create_app(config_class=Config):
     app.register_blueprint(role_bp, url_prefix='/api/roles')
     app.register_blueprint(plugin_bp, url_prefix='/api/plugins')
 
-    # Initialize plugin manager
-    from app.plugins.manager.plugin_manager import PluginManager
-    plugin_manager = PluginManager(app)
-    app.plugin_manager = plugin_manager
-    plugin_manager.load_plugins()
-
-    # Create tables
+    # Create tables first
     with app.app_context():
         db.create_all()
         # Initialize default roles and admin user
         from app.utils.init_db import initialize_database
         initialize_database()
+
+    # Initialize plugin manager after database is ready
+    from app.plugins.manager.plugin_manager import PluginManager
+    plugin_manager = PluginManager(app)
+    app.plugin_manager = plugin_manager
+    plugin_manager.load_plugins()
 
     return app
