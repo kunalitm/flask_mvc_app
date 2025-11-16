@@ -17,11 +17,14 @@ class User(db.Model):
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     is_active = db.Column(db.Boolean, default=True)
+    is_super_admin = db.Column(db.Boolean, default=False)  # Super admin flag
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)  # NULL for super admin
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles', back_populates='users', lazy='dynamic')
+    company = db.relationship('Company', back_populates='users')
 
     def __init__(self, username, email, password, first_name=None, last_name=None):
         """Initialize user with hashed password"""
@@ -57,7 +60,7 @@ class User(db.Model):
         if self.has_role(role.name):
             self.roles.remove(role)
 
-    def to_dict(self, include_roles=False):
+    def to_dict(self, include_roles=False, include_company=False):
         """Convert user to dictionary"""
         data = {
             'id': self.id,
@@ -66,11 +69,15 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'is_active': self.is_active,
+            'is_super_admin': self.is_super_admin,
+            'company_id': self.company_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
         if include_roles:
             data['roles'] = [role.to_dict() for role in self.roles]
+        if include_company and self.company:
+            data['company'] = self.company.to_dict()
         return data
 
     def __repr__(self):

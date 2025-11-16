@@ -31,16 +31,18 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
 
     # Import models
-    from app.models import user, role, plugin
+    from app.models import user, role, plugin, company, company_plugin
 
     # Register blueprints
     from app.controllers.user_controller import user_bp
     from app.controllers.role_controller import role_bp
     from app.controllers.plugin_controller import plugin_bp
+    from app.controllers.company_controller import company_bp
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
     app.register_blueprint(role_bp, url_prefix='/api/roles')
     app.register_blueprint(plugin_bp, url_prefix='/api/plugins')
+    app.register_blueprint(company_bp, url_prefix='/api/companies')
 
     # Create tables first
     with app.app_context():

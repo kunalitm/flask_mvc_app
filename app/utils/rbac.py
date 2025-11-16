@@ -88,8 +88,9 @@ def login_required(f):
         if not user or not user.is_active:
             return jsonify({'error': 'User not found or inactive'}), 401
 
-        # Store user in g object for access in route
+        # Store user in both g and request for access in route
         g.current_user = user
+        request.current_user = user
 
         return f(*args, **kwargs)
 
@@ -149,15 +150,28 @@ def permission_required(permission):
         def decorated_function(*args, **kwargs):
             user = g.current_user
 
+            # Super admin has all permissions
+            if user.is_super_admin:
+                return f(*args, **kwargs)
+
             # Check permissions in user's roles
             import json
             has_permission = False
 
             for role in user.roles:
                 permissions = json.loads(role.permissions) if role.permissions else []
+                # Check for exact permission or wildcard
                 if permission in permissions or '*' in permissions:
                     has_permission = True
                     break
+
+                # Check for wildcard patterns (e.g., "users.*" matches "users.create")
+                for perm in permissions:
+                    if perm.endswith('.*'):
+                        prefix = perm[:-2]
+                        if permission.startswith(prefix + '.'):
+                            has_permission = True
+                            break
 
             if not has_permission:
                 return jsonify({
