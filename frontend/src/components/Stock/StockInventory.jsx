@@ -23,7 +23,8 @@ function StockInventory() {
         stockService.getAll(),
         stockService.getStats(),
       ])
-      setItems(itemsData)
+      // API returns { items: [...] }, extract the array
+      setItems(itemsData.items || itemsData || [])
       setStats(statsData)
     } catch (err) {
       setError('Failed to load inventory: ' + (err.response?.data?.error || err.message))

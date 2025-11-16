@@ -19,7 +19,8 @@ function Roles() {
     setError('')
     try {
       const data = await roleService.getAll()
-      setRoles(data)
+      // API returns { roles: [...] }, extract the array
+      setRoles(data.roles || [])
     } catch (err) {
       setError('Failed to load roles: ' + (err.response?.data?.error || err.message))
     } finally {

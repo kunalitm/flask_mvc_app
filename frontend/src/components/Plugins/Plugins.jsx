@@ -19,7 +19,8 @@ function Plugins() {
     setError('')
     try {
       const data = await pluginService.getAll()
-      setPlugins(data)
+      // API returns { plugins: [...] }, extract the array
+      setPlugins(data.plugins || [])
     } catch (err) {
       setError('Failed to load plugins: ' + (err.response?.data?.error || err.message))
     } finally {

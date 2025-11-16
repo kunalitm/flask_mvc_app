@@ -38,7 +38,8 @@ function Users() {
   const loadRoles = async () => {
     try {
       const data = await roleService.getAll()
-      setRoles(data)
+      // API returns { roles: [...] }, extract the array
+      setRoles(data.roles || [])
     } catch (err) {
       console.error('Failed to load roles:', err)
     }

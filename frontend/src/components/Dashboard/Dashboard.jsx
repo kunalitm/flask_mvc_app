@@ -32,9 +32,9 @@ function Dashboard() {
       setCurrentUser(user)
       setStats({
         users: usersData.total || 0,
-        roles: rolesData.length || 0,
-        plugins: pluginsData.length || 0,
-        enabledPlugins: enabledPlugins.length || 0,
+        roles: rolesData.roles?.length || 0,
+        plugins: pluginsData.plugins?.length || 0,
+        enabledPlugins: enabledPlugins.plugins?.length || 0,
         stockItems: 0,
       })
 
