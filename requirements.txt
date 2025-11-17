@@ -6,12 +6,16 @@ Flask-Bcrypt==1.0.1
 
 # Database drivers
 SQLAlchemy==2.0.36
+psycopg2
 
 # Authentication
 PyJWT==2.8.0
 
 # Utilities
 python-dotenv==1.0.0
+
+# API Documentation
+flasgger==0.9.7.1
 
 # Development dependencies
 pytest==7.4.3

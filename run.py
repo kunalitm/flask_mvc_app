@@ -4,8 +4,12 @@ Application entry point
 Run the Flask application with: python run.py
 """
 import os
+from dotenv import load_dotenv
 from app import create_app
 from app.config.settings import config
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Get environment from environment variable or default to development
 env = os.environ.get('FLASK_ENV', 'development')

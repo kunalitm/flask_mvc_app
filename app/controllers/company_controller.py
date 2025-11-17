@@ -27,19 +27,47 @@ def slugify(text):
 def get_companies():
     """
     Get all companies (Super admin only or users can see their own company)
-
-    Query Parameters:
-        - page: Page number (default: 1)
-        - per_page: Items per page (default: 10)
-        - include_stats: Include statistics (default: false)
-
-    Response:
-        {
-            "companies": [{company_object}],
-            "total": N,
-            "page": N,
-            "per_page": N
-        }
+    ---
+    tags:
+      - Companies
+    security:
+      - Bearer: []
+    parameters:
+      - in: query
+        name: page
+        type: integer
+        default: 1
+        description: Page number
+      - in: query
+        name: per_page
+        type: integer
+        default: 10
+        description: Items per page
+      - in: query
+        name: include_stats
+        type: boolean
+        default: false
+        description: Include statistics
+    responses:
+      200:
+        description: List of companies
+        schema:
+          type: object
+          properties:
+            companies:
+              type: array
+              items:
+                type: object
+            total:
+              type: integer
+            page:
+              type: integer
+            per_page:
+              type: integer
+      401:
+        description: Authentication required
+      403:
+        description: Insufficient permissions
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -93,19 +121,52 @@ def get_company(company_id):
 def create_company():
     """
     Create a new company (Super admin only)
-
-    Request:
-        {
-            "name": "Company Name",
-            "description": "Company description",
-            "email": "contact@company.com",
-            "phone": "+1234567890",
-            "address": "Company address",
-            "max_users": 50
-        }
-
-    Response:
-        {company_object}
+    ---
+    tags:
+      - Companies
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: company
+        description: Company to create
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              example: ACME Corporation
+            description:
+              type: string
+              example: Technology company
+            email:
+              type: string
+              example: contact@acme.com
+            phone:
+              type: string
+              example: +1234567890
+            address:
+              type: string
+              example: 123 Main St, City
+            max_users:
+              type: integer
+              example: 50
+            settings:
+              type: object
+    responses:
+      201:
+        description: Company created successfully
+        schema:
+          type: object
+      400:
+        description: Missing required fields or company already exists
+      401:
+        description: Authentication required
+      403:
+        description: Insufficient permissions
     """
     data = request.get_json()
 
@@ -218,11 +279,48 @@ def delete_company(company_id):
 def get_company_plugins(company_id):
     """
     Get all plugins for a company
-
-    Response:
-        {
-            "plugins": [{plugin_object_with_company_status}]
-        }
+    ---
+    tags:
+      - Companies
+      - Plugins
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: company_id
+        type: integer
+        required: true
+        description: Company ID
+    responses:
+      200:
+        description: List of plugins with company-specific status
+        schema:
+          type: object
+          properties:
+            plugins:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  company_status:
+                    type: object
+                    properties:
+                      is_enabled:
+                        type: boolean
+                      installed_at:
+                        type: string
+                      config:
+                        type: object
+      401:
+        description: Authentication required
+      403:
+        description: Insufficient permissions
+      404:
+        description: Company not found
     """
     company = Company.query.get_or_404(company_id)
 
@@ -303,9 +401,34 @@ def install_plugin_to_company(company_id, plugin_id):
 def enable_company_plugin(company_id, plugin_id):
     """
     Enable a plugin for a company
-
-    Response:
-        {company_plugin_object}
+    ---
+    tags:
+      - Companies
+      - Plugins
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: company_id
+        type: integer
+        required: true
+        description: Company ID
+      - in: path
+        name: plugin_id
+        type: integer
+        required: true
+        description: Plugin ID
+    responses:
+      200:
+        description: Plugin enabled successfully
+        schema:
+          type: object
+      401:
+        description: Authentication required
+      403:
+        description: Insufficient permissions
+      404:
+        description: Plugin not installed for this company
     """
     company_plugin = CompanyPlugin.query.filter_by(
         company_id=company_id,

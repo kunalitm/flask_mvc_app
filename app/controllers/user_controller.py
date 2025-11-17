@@ -15,22 +15,52 @@ user_bp = Blueprint('users', __name__)
 def login():
     """
     User login endpoint
-
-    Request:
-        {
-            "username": "admin",
-            "password": "admin123"
-        }
-
-    Response:
-        {
-            "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-            "user": {
-                "id": 1,
-                "username": "admin",
-                "email": "admin@example.com"
-            }
-        }
+    ---
+    tags:
+      - Authentication
+    parameters:
+      - in: body
+        name: credentials
+        description: User credentials
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+              example: admin
+            password:
+              type: string
+              example: admin123
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              example: eyJ0eXAiOiJKV1QiLCJhbGc...
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                username:
+                  type: string
+                email:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: object
+      400:
+        description: Missing username or password
+      401:
+        description: Invalid credentials or inactive account
     """
     data = request.get_json()
 
@@ -59,19 +89,42 @@ def login():
 def get_users():
     """
     Get all users (paginated)
-
-    Query Parameters:
-        - page: Page number (default: 1)
-        - per_page: Items per page (default: 20)
-
-    Response:
-        {
-            "users": [...],
-            "total": 100,
-            "page": 1,
-            "per_page": 20,
-            "pages": 5
-        }
+    ---
+    tags:
+      - Users
+    security:
+      - Bearer: []
+    parameters:
+      - in: query
+        name: page
+        type: integer
+        default: 1
+        description: Page number
+      - in: query
+        name: per_page
+        type: integer
+        default: 20
+        description: Items per page
+    responses:
+      200:
+        description: List of users
+        schema:
+          type: object
+          properties:
+            users:
+              type: array
+              items:
+                type: object
+            total:
+              type: integer
+            page:
+              type: integer
+            per_page:
+              type: integer
+            pages:
+              type: integer
+      401:
+        description: Authentication required
     """
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
@@ -92,14 +145,41 @@ def get_users():
 def get_user(user_id):
     """
     Get user by ID
-
-    Response:
-        {
-            "id": 1,
-            "username": "admin",
-            "email": "admin@example.com",
-            "roles": [...]
-        }
+    ---
+    tags:
+      - Users
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: user_id
+        type: integer
+        required: true
+        description: User ID
+    responses:
+      200:
+        description: User details
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            username:
+              type: string
+            email:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+            roles:
+              type: array
+              items:
+                type: object
+      401:
+        description: Authentication required
+      404:
+        description: User not found
     """
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict(include_roles=True)), 200
@@ -110,22 +190,61 @@ def get_user(user_id):
 def create_user():
     """
     Create a new user
-
-    Request:
-        {
-            "username": "newuser",
-            "email": "user@example.com",
-            "password": "password123",
-            "first_name": "John",
-            "last_name": "Doe",
-            "role_ids": [2]
-        }
-
-    Response:
-        {
-            "message": "User created successfully",
-            "user": {...}
-        }
+    ---
+    tags:
+      - Users
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: user
+        description: User to create
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - email
+            - password
+          properties:
+            username:
+              type: string
+              example: newuser
+            email:
+              type: string
+              example: user@example.com
+            password:
+              type: string
+              example: password123
+            first_name:
+              type: string
+              example: John
+            last_name:
+              type: string
+              example: Doe
+            role_ids:
+              type: array
+              items:
+                type: integer
+              example: [2]
+    responses:
+      201:
+        description: User created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            user:
+              type: object
+      400:
+        description: Missing required fields
+      401:
+        description: Authentication required
+      403:
+        description: Admin role required
+      409:
+        description: Username or email already exists
     """
     data = request.get_json()
 
@@ -308,13 +427,32 @@ def remove_role(user_id, role_id):
 def get_current_user():
     """
     Get current authenticated user
-
-    Response:
-        {
-            "id": 1,
-            "username": "admin",
-            "email": "admin@example.com",
-            "roles": [...]
-        }
+    ---
+    tags:
+      - Authentication
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Current user details
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            username:
+              type: string
+            email:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+            roles:
+              type: array
+              items:
+                type: object
+      401:
+        description: Authentication required
     """
     return jsonify(g.current_user.to_dict(include_roles=True)), 200

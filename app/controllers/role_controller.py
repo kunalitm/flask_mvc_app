@@ -16,19 +16,36 @@ role_bp = Blueprint('roles', __name__)
 def get_roles():
     """
     Get all roles
-
-    Response:
-        {
-            "roles": [
-                {
-                    "id": 1,
-                    "name": "admin",
-                    "description": "Administrator role",
-                    "permissions": [...],
-                    "is_system": true
-                }
-            ]
-        }
+    ---
+    tags:
+      - Roles
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of all roles
+        schema:
+          type: object
+          properties:
+            roles:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  permissions:
+                    type: array
+                    items:
+                      type: string
+                  is_system:
+                    type: boolean
+      401:
+        description: Authentication required
     """
     roles = Role.query.all()
     return jsonify({
@@ -41,15 +58,39 @@ def get_roles():
 def get_role(role_id):
     """
     Get role by ID
-
-    Response:
-        {
-            "id": 1,
-            "name": "admin",
-            "description": "Administrator role",
-            "permissions": [...],
-            "user_count": 5
-        }
+    ---
+    tags:
+      - Roles
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: role_id
+        type: integer
+        required: true
+        description: Role ID
+    responses:
+      200:
+        description: Role details
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            description:
+              type: string
+            permissions:
+              type: array
+              items:
+                type: string
+            user_count:
+              type: integer
+      401:
+        description: Authentication required
+      404:
+        description: Role not found
     """
     role = Role.query.get_or_404(role_id)
     return jsonify(role.to_dict(include_users=True)), 200
@@ -60,19 +101,50 @@ def get_role(role_id):
 def create_role():
     """
     Create a new role
-
-    Request:
-        {
-            "name": "moderator",
-            "description": "Moderator role",
-            "permissions": ["users.read", "users.update"]
-        }
-
-    Response:
-        {
-            "message": "Role created successfully",
-            "role": {...}
-        }
+    ---
+    tags:
+      - Roles
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: role
+        description: Role to create
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              example: moderator
+            description:
+              type: string
+              example: Moderator role
+            permissions:
+              type: array
+              items:
+                type: string
+              example: ["users.read", "users.update"]
+    responses:
+      201:
+        description: Role created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            role:
+              type: object
+      400:
+        description: Role name is required
+      401:
+        description: Authentication required
+      403:
+        description: Admin role required
+      409:
+        description: Role name already exists
     """
     data = request.get_json()
 
